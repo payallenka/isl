@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+.env
+.env*/
+venv/
+env/
+
+# Django
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.db-journal
+
+# Jupyter
+.ipynb_checkpoints
+
+# VSCode
+.vscode/
+
+# React Native / Node
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Android
+android/app/build/
+android/build/
+*.keystore
+
+# iOS
+ios/build/
+ios/Pods/
+
+# Model files (should be shared separately, not in git)
+*.h5
+*.pkl
+*.npy
+
+# Misc
+.DS_Store
+Thumbs.db
+.idea/
+
+# Ignore test outputs
+ml_service/sample_keypoints.json

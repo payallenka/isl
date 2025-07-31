@@ -1,0 +1,7 @@
+django
+djangorestframework
+requests
+firebase-admin
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-django
