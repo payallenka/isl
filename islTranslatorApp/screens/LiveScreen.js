@@ -4,7 +4,7 @@ import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import { NativeModules } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import TransactionsScreen from './TransactionsScreen';
-
+import { useAuth } from '../src/contexts/AuthContext';
 
 const SEQ_LEN = 20; 
 const KEYPOINTS_PER_FRAME = 1662; 
@@ -20,6 +20,8 @@ export default function LiveScreen({ navigation }) {
   const [lastTransaction, setLastTransaction] = useState(null);
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
+  const { getAuthToken } = useAuth();
+  
   const allDevices = [
     ...(Array.isArray(devices.back) ? devices.back : devices.back ? [devices.back] : []),
     ...(Array.isArray(devices.front) ? devices.front : devices.front ? [devices.front] : []),
@@ -100,6 +102,18 @@ export default function LiveScreen({ navigation }) {
       const keypointsMatrix = Array.from({ length: SEQ_LEN }, () =>
         Array.from({ length: KEYPOINTS_PER_FRAME }, () => Math.random())
       );
+      
+      // Get authentication token
+      const authToken = await getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add authorization header if token exists
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
       // Add a timeout to the fetch request
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 7000); // 7 seconds
@@ -107,7 +121,7 @@ export default function LiveScreen({ navigation }) {
       try {
         res = await fetch(BACKEND_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({ keypoints: keypointsMatrix }),
           signal: controller.signal
         });
@@ -152,7 +166,15 @@ export default function LiveScreen({ navigation }) {
 
   const fetchLastTransaction = async () => {
     try {
-      const res = await fetch('http://192.168.0.165:8000/api/transactions/');
+      const authToken = await getAuthToken();
+      const headers = {};
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
+      const res = await fetch('http://192.168.0.165:8000/api/transactions/', {
+        headers: headers
+      });
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         setLastTransaction(data[0]);

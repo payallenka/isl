@@ -1,9 +1,40 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import { useAuth } from '../src/contexts/AuthContext';
 
 export default function HomeScreen({ navigation }) {
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await signOut();
+            if (!result.success) {
+              Alert.alert('Error', result.error);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
+      {/* User Info */}
+      <View style={styles.userInfo}>
+        <Text style={styles.welcomeText}>
+          Welcome, {user?.displayName || user?.email || 'User'}!
+        </Text>
+        <Button title="Sign Out" onPress={handleSignOut} color="#ef4444" />
+      </View>
+
       <View style={styles.illustrationBox}>
         {/* Placeholder for illustration/icon */}
         <View style={styles.illustrationCircle}>
@@ -35,6 +66,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
+  },
+  userInfo: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    alignItems: 'flex-end',
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: '#6b7280',
+    marginBottom: 8,
   },
   illustrationBox: {
     flexDirection: 'row',

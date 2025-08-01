@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, Button } from 'react-native';
+import { useAuth } from '../src/contexts/AuthContext';
 
 function formatDate(isoString) {
   if (!isoString) return '';
@@ -11,11 +12,20 @@ export default function TransactionsScreen({ navigation }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { getAuthToken } = useAuth();
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const res = await fetch('http://192.168.0.165:8000/api/transactions/');
+        const authToken = await getAuthToken();
+        const headers = {};
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`;
+        }
+        
+        const res = await fetch('http://192.168.0.165:8000/api/transactions/', {
+          headers: headers
+        });
         const data = await res.json();
         if (Array.isArray(data)) {
           setTransactions(data);
@@ -29,7 +39,7 @@ export default function TransactionsScreen({ navigation }) {
       }
     };
     fetchTransactions();
-  }, []);
+  }, [getAuthToken]);
 
   const renderTransaction = ({ item }) => (
     <View style={styles.card}>
