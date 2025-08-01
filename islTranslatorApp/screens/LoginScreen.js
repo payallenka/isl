@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  Button, 
+  StyleSheet, 
+  Alert, 
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard
+} from 'react-native';
 import { useAuth } from '../src/contexts/AuthContext';
 
 export default function LoginScreen({ navigation }) {
@@ -8,16 +21,36 @@ export default function LoginScreen({ navigation }) {
   const [displayName, setDisplayName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const { signIn, signUp } = useAuth();
 
   const handleAuth = async () => {
+    // Clear previous error messages
+    setErrorMessage('');
+
+    // Validate inputs
     if (!email || !password || (isSignUp && !displayName)) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setErrorMessage('Please fill in all fields');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage('Please enter a valid email address');
+      return;
+    }
+
+    // Validate password length for sign up
+    if (isSignUp && password.length < 6) {
+      setErrorMessage('Password should be at least 6 characters long');
       return;
     }
 
     setLoading(true);
     try {
+      console.log(`Attempting to ${isSignUp ? 'sign up' : 'sign in'} with email:`, email);
+      
       let result;
       if (isSignUp) {
         result = await signUp(email, password, displayName);
@@ -25,100 +58,225 @@ export default function LoginScreen({ navigation }) {
         result = await signIn(email, password);
       }
 
+      console.log('Auth result:', result);
+
       if (result.success) {
-        // Navigation will be handled by AuthContext
         console.log('Authentication successful');
+        // Navigation will be handled by AuthContext
       } else {
-        Alert.alert('Error', result.error);
+        console.log('Authentication failed:', result.error);
+        setErrorMessage(result.error);
       }
     } catch (error) {
-      Alert.alert('Error', error.message);
+      console.error('Unexpected error during authentication:', error);
+      setErrorMessage('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const clearError = () => {
+    setErrorMessage('');
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {isSignUp ? 'Create Account' : 'Sign In'}
-      </Text>
-      
-      {isSignUp && (
-        <TextInput
-          style={styles.input}
-          placeholder="Display Name"
-          value={displayName}
-          onChangeText={setDisplayName}
-          autoCapitalize="words"
-        />
-      )}
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      
-      {loading ? (
-        <ActivityIndicator size="large" color="#2563eb" style={styles.loader} />
-      ) : (
-        <Button 
-          title={isSignUp ? 'Sign Up' : 'Sign In'} 
-          onPress={handleAuth}
-          disabled={!email || !password || (isSignUp && !displayName)}
-        />
-      )}
-      
-      <Button 
-        title={isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'} 
-        onPress={() => setIsSignUp(!isSignUp)}
-        color="#6b7280"
-      />
-    </View>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header Section */}
+          <View style={styles.headerSection}>
+            <View style={styles.illustrationCircle}>
+              <Text style={{ fontSize: 48, color: '#a21caf' }}>🤟</Text>
+            </View>
+            <Text style={styles.title}>
+              {isSignUp ? 'Create Account' : 'Welcome Back'}
+            </Text>
+            <Text style={styles.subtitle}>
+              {isSignUp 
+                ? 'Join us to start translating sign language in real-time'
+                : 'Sign in to continue your translation journey'
+              }
+            </Text>
+          </View>
+
+          {/* Form Section */}
+          <View style={styles.formSection}>
+            {isSignUp && (
+              <TextInput
+                style={styles.input}
+                placeholder="Display Name"
+                value={displayName}
+                onChangeText={(text) => {
+                  setDisplayName(text);
+                  clearError();
+                }}
+                autoCapitalize="words"
+                placeholderTextColor="#9ca3af"
+                returnKeyType="next"
+              />
+            )}
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                clearError();
+              }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholderTextColor="#9ca3af"
+              returnKeyType="next"
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                clearError();
+              }}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholderTextColor="#9ca3af"
+              returnKeyType="done"
+              onSubmitEditing={handleAuth}
+            />
+            
+            {/* Error Message */}
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+            
+            {loading ? (
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#6d28d9" />
+                <Text style={styles.loaderText}>
+                  {isSignUp ? 'Creating account...' : 'Signing in...'}
+                </Text>
+              </View>
+            ) : (
+              <Button 
+                title={isSignUp ? 'Create Account' : 'Sign In'} 
+                onPress={handleAuth}
+                disabled={!email || !password || (isSignUp && !displayName)}
+                color="#6d28d9"
+              />
+            )}
+          </View>
+
+          {/* Footer Section */}
+          <View style={styles.footerSection}>
+            <Button 
+              title={isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'} 
+              onPress={() => {
+                setIsSignUp(!isSignUp);
+                setErrorMessage(''); // Clear errors when switching modes
+              }}
+              color="#6b7280"
+            />
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#fff',
+  },
+  scrollContainer: {
+    flexGrow: 1,
     padding: 24,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2563eb',
+  headerSection: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingBottom: 20,
+  },
+  illustrationCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#f3e8ff',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#3b0764',
     textAlign: 'center',
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 22,
+  },
+  formSection: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   input: {
     width: '100%',
-    maxWidth: 320,
     borderWidth: 1,
     borderColor: '#d1d5db',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    backgroundColor: '#f9fafb',
+    fontSize: 16,
+    color: '#1f2937',
+  },
+  errorContainer: {
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fecaca',
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
-    backgroundColor: '#fff',
   },
-  loader: {
-    marginVertical: 16,
+  errorText: {
+    color: '#dc2626',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  loaderContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  loaderText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#6b7280',
+  },
+  footerSection: {
+    paddingBottom: 40,
+    alignItems: 'center',
+    paddingTop: 20,
   },
 });
