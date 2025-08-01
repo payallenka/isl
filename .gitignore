@@ -59,6 +59,7 @@ ml_service/sample_keypoints.json
 **/google-services.json
 **/GoogleService-Info.plist
 **/firebase-config.js
+**/firebase.js
 **/firebase.json
 **/firebase-debug.log
 **/firebase-debug.*.log

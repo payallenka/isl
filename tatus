@@ -194,4 +194,8 @@
 [32m+[m[32m- You do **not** need to keep Android Studio running after installing the SDK.[m
 [32m+[m[32m- Metro must be running for live JS updates.[m
 [32m+[m[32m- For production builds or emulator use, see the React Native docs.[m
-[32m+[m[
+[32m+[m[32m- The app currently supports **Android only**.[m
+[32m+[m[32m- Firebase Authentication is required for all features.[m
+[32m+[m
+[32m+[m[32m---[m
+\ No newline at end of file[m

@@ -78,6 +78,7 @@ yarn-error.log
 **/google-services.json
 **/GoogleService-Info.plist
 **/firebase-config.js
+**/firebase.js
 **/firebase.json
 **/firebase-debug.log
 **/firebase-debug.*.log
