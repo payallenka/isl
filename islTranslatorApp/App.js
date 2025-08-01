@@ -18,7 +18,7 @@ function Navigation() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return null; // Or a loading screen
+    return null;
   }
 
   return (
@@ -28,7 +28,6 @@ function Navigation() {
         screenOptions={{ headerShown: false }}
       >
         {user ? (
-          // Authenticated stack
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="LiveScreen" component={LiveScreen} />
@@ -36,7 +35,6 @@ function Navigation() {
             <Stack.Screen name="Transactions" component={TransactionsScreen} />
           </>
         ) : (
-          // Authentication stack
           <Stack.Screen name="Login" component={LoginScreen} />
         )}
       </Stack.Navigator>

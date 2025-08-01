@@ -25,24 +25,33 @@ export default function HomeScreen({ navigation }) {
     );
   };
 
+  const getDisplayName = () => {
+    if (user?.displayName) {
+      return user.displayName;
+    } else if (user?.email) {
+      const username = user.email.split('@')[0];
+      return username;
+    } else {
+      return 'User';
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* User Info */}
       <View style={styles.userInfo}>
         <Text style={styles.welcomeText}>
-          Welcome, {user?.displayName || user?.email || 'User'}!
+          Welcome, {getDisplayName()}!
         </Text>
         <Button title="Sign Out" onPress={handleSignOut} color="#ef4444" />
       </View>
 
       <View style={styles.illustrationBox}>
-        {/* Placeholder for illustration/icon */}
         <View style={styles.illustrationCircle}>
-          <Text style={{ fontSize: 48, color: '#a21caf' }}>🎤</Text>
+          <Text style={styles.iconText}>🎤</Text>
         </View>
         <Text style={styles.illustrationArrow}>→</Text>
         <View style={styles.illustrationCircle}>
-          <Text style={{ fontSize: 48, color: '#fde047' }}>🤟</Text>
+          <Text style={styles.iconText}>🤟</Text>
         </View>
       </View>
       <Text style={styles.title}>Real-Time Sign Language Translator</Text>
@@ -90,6 +99,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f3e8ff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  iconText: {
+    fontSize: 48,
+    color: '#a21caf',
   },
   illustrationArrow: {
     fontSize: 32,

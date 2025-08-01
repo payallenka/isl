@@ -30,12 +30,10 @@ export default function LiveScreen({ navigation }) {
   const device = allDevices.find(d => d.position === 'front') || null;
 
   useEffect(() => {
-    // Log and alert for debugging
     console.log('Available camera devices:', devices);
     console.log('Selected device:', device);
   }, [devices, device]);
 
-  // Request camera permission at runtime using Vision Camera's API
   useEffect(() => {
     (async () => {
       const status = await Camera.requestCameraPermission();
@@ -43,12 +41,11 @@ export default function LiveScreen({ navigation }) {
     })();
   }, []);
 
-  // Helper to render permission state
   const renderPermissionState = () => {
     switch (permission) {
       case 'authorized':
       case 'granted':
-        return null; // Render camera UI below
+        return null;
       case 'not-determined':
         return (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -103,20 +100,17 @@ export default function LiveScreen({ navigation }) {
         Array.from({ length: KEYPOINTS_PER_FRAME }, () => Math.random())
       );
       
-      // Get authentication token
       const authToken = await getAuthToken();
       const headers = {
         'Content-Type': 'application/json'
       };
       
-      // Add authorization header if token exists
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
       
-      // Add a timeout to the fetch request
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 7000); // 7 seconds
+      const timeout = setTimeout(() => controller.abort(), 7000);
       let res, data;
       try {
         res = await fetch(BACKEND_URL, {
@@ -202,7 +196,6 @@ export default function LiveScreen({ navigation }) {
     );
   }
 
-  // Log the native module to check if it's linked
   console.log('VisionCamera NativeModules:', NativeModules.VisionCameraModule);
 
   return (
@@ -217,13 +210,10 @@ export default function LiveScreen({ navigation }) {
               isActive={true}
               photo={true}
             />
-            {/* Grid Overlay */}
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} pointerEvents="none">
               <Svg height="100%" width="100%">
-                {/* Vertical lines */}
                 <Line x1="33%" y1="0" x2="33%" y2="100%" stroke="white" strokeWidth="2" strokeDasharray="6" />
                 <Line x1="66%" y1="0" x2="66%" y2="100%" stroke="white" strokeWidth="2" strokeDasharray="6" />
-                {/* Horizontal lines */}
                 <Line x1="0" y1="33%" x2="100%" y2="33%" stroke="white" strokeWidth="2" strokeDasharray="6" />
                 <Line x1="0" y1="66%" x2="100%" y2="66%" stroke="white" strokeWidth="2" strokeDasharray="6" />
               </Svg>

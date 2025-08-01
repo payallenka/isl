@@ -11,7 +11,8 @@ import {
   ScrollView,
   Platform,
   TouchableWithoutFeedback,
-  Keyboard
+  Keyboard,
+  TouchableOpacity
 } from 'react-native';
 import { useAuth } from '../src/contexts/AuthContext';
 
@@ -22,26 +23,23 @@ export default function LoginScreen({ navigation }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, signUp } = useAuth();
 
   const handleAuth = async () => {
-    // Clear previous error messages
     setErrorMessage('');
 
-    // Validate inputs
     if (!email || !password || (isSignUp && !displayName)) {
       setErrorMessage('Please fill in all fields');
       return;
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setErrorMessage('Please enter a valid email address');
       return;
     }
 
-    // Validate password length for sign up
     if (isSignUp && password.length < 6) {
       setErrorMessage('Password should be at least 6 characters long');
       return;
@@ -62,7 +60,6 @@ export default function LoginScreen({ navigation }) {
 
       if (result.success) {
         console.log('Authentication successful');
-        // Navigation will be handled by AuthContext
       } else {
         console.log('Authentication failed:', result.error);
         setErrorMessage(result.error);
@@ -79,6 +76,10 @@ export default function LoginScreen({ navigation }) {
     setErrorMessage('');
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <KeyboardAvoidingView 
       style={styles.container}
@@ -91,10 +92,9 @@ export default function LoginScreen({ navigation }) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header Section */}
           <View style={styles.headerSection}>
             <View style={styles.illustrationCircle}>
-              <Text style={{ fontSize: 48, color: '#a21caf' }}>🤟</Text>
+              <Text style={styles.iconText}>🔒</Text>
             </View>
             <Text style={styles.title}>
               {isSignUp ? 'Create Account' : 'Welcome Back'}
@@ -107,55 +107,67 @@ export default function LoginScreen({ navigation }) {
             </Text>
           </View>
 
-          {/* Form Section */}
           <View style={styles.formSection}>
             {isSignUp && (
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Display Name"
+                  value={displayName}
+                  onChangeText={(text) => {
+                    setDisplayName(text);
+                    clearError();
+                  }}
+                  autoCapitalize="words"
+                  placeholderTextColor="#9ca3af"
+                  returnKeyType="next"
+                />
+              </View>
+            )}
+            
+            <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
-                placeholder="Display Name"
-                value={displayName}
+                placeholder="Email"
+                value={email}
                 onChangeText={(text) => {
-                  setDisplayName(text);
+                  setEmail(text);
                   clearError();
                 }}
-                autoCapitalize="words"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
                 placeholderTextColor="#9ca3af"
                 returnKeyType="next"
               />
-            )}
+            </View>
             
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                clearError();
-              }}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholderTextColor="#9ca3af"
-              returnKeyType="next"
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                placeholder="Password"
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  clearError();
+                }}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                placeholderTextColor="#9ca3af"
+                returnKeyType="done"
+                onSubmitEditing={handleAuth}
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon} 
+                onPress={togglePasswordVisibility}
+              >
+                <Text style={styles.eyeIconText}>
+                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                clearError();
-              }}
-              secureTextEntry
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholderTextColor="#9ca3af"
-              returnKeyType="done"
-              onSubmitEditing={handleAuth}
-            />
-            
-            {/* Error Message */}
             {errorMessage ? (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{errorMessage}</Text>
@@ -179,13 +191,12 @@ export default function LoginScreen({ navigation }) {
             )}
           </View>
 
-          {/* Footer Section */}
           <View style={styles.footerSection}>
             <Button 
               title={isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'} 
               onPress={() => {
                 setIsSignUp(!isSignUp);
-                setErrorMessage(''); // Clear errors when switching modes
+                setErrorMessage('');
               }}
               color="#6b7280"
             />
@@ -221,6 +232,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 24,
   },
+  iconText: {
+    fontSize: 48,
+    color: '#a21caf',
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -241,16 +256,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
   },
+  inputContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
   input: {
     width: '100%',
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
     backgroundColor: '#f9fafb',
     fontSize: 16,
     color: '#1f2937',
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    padding: 4,
+  },
+  eyeIconText: {
+    fontSize: 20,
+    color: '#6b7280',
   },
   errorContainer: {
     backgroundColor: '#fef2f2',

@@ -7,7 +7,6 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
-// Helper function to get user-friendly error messages
 const getErrorMessage = (errorCode) => {
   switch (errorCode) {
     case 'auth/user-not-found':
