@@ -4,7 +4,7 @@ import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import { NativeModules } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import TransactionsScreen from './TransactionsScreen';
-
+import { useAuth } from '../src/contexts/AuthContext';
 
 const SEQ_LEN = 20; 
 const KEYPOINTS_PER_FRAME = 1662; 
@@ -20,6 +20,8 @@ export default function LiveScreen({ navigation }) {
   const [lastTransaction, setLastTransaction] = useState(null);
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
+  const { getAuthToken } = useAuth();
+  
   const allDevices = [
     ...(Array.isArray(devices.back) ? devices.back : devices.back ? [devices.back] : []),
     ...(Array.isArray(devices.front) ? devices.front : devices.front ? [devices.front] : []),
@@ -28,12 +30,10 @@ export default function LiveScreen({ navigation }) {
   const device = allDevices.find(d => d.position === 'front') || null;
 
   useEffect(() => {
-    // Log and alert for debugging
     console.log('Available camera devices:', devices);
     console.log('Selected device:', device);
   }, [devices, device]);
 
-  // Request camera permission at runtime using Vision Camera's API
   useEffect(() => {
     (async () => {
       const status = await Camera.requestCameraPermission();
@@ -41,12 +41,11 @@ export default function LiveScreen({ navigation }) {
     })();
   }, []);
 
-  // Helper to render permission state
   const renderPermissionState = () => {
     switch (permission) {
       case 'authorized':
       case 'granted':
-        return null; // Render camera UI below
+        return null;
       case 'not-determined':
         return (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -100,14 +99,23 @@ export default function LiveScreen({ navigation }) {
       const keypointsMatrix = Array.from({ length: SEQ_LEN }, () =>
         Array.from({ length: KEYPOINTS_PER_FRAME }, () => Math.random())
       );
-      // Add a timeout to the fetch request
+      
+      const authToken = await getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 7000); // 7 seconds
+      const timeout = setTimeout(() => controller.abort(), 7000);
       let res, data;
       try {
         res = await fetch(BACKEND_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({ keypoints: keypointsMatrix }),
           signal: controller.signal
         });
@@ -152,7 +160,15 @@ export default function LiveScreen({ navigation }) {
 
   const fetchLastTransaction = async () => {
     try {
-      const res = await fetch('http://192.168.0.165:8000/api/transactions/');
+      const authToken = await getAuthToken();
+      const headers = {};
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
+      const res = await fetch('http://192.168.0.165:8000/api/transactions/', {
+        headers: headers
+      });
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         setLastTransaction(data[0]);
@@ -180,7 +196,6 @@ export default function LiveScreen({ navigation }) {
     );
   }
 
-  // Log the native module to check if it's linked
   console.log('VisionCamera NativeModules:', NativeModules.VisionCameraModule);
 
   return (
@@ -195,13 +210,10 @@ export default function LiveScreen({ navigation }) {
               isActive={true}
               photo={true}
             />
-            {/* Grid Overlay */}
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} pointerEvents="none">
               <Svg height="100%" width="100%">
-                {/* Vertical lines */}
                 <Line x1="33%" y1="0" x2="33%" y2="100%" stroke="white" strokeWidth="2" strokeDasharray="6" />
                 <Line x1="66%" y1="0" x2="66%" y2="100%" stroke="white" strokeWidth="2" strokeDasharray="6" />
-                {/* Horizontal lines */}
                 <Line x1="0" y1="33%" x2="100%" y2="33%" stroke="white" strokeWidth="2" strokeDasharray="6" />
                 <Line x1="0" y1="66%" x2="100%" y2="66%" stroke="white" strokeWidth="2" strokeDasharray="6" />
               </Svg>

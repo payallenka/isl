@@ -26,7 +26,6 @@ export default function CameraView({ onCapture, onCancel }) {
       } else {
         setHasPermission(true);
       }
-      // Log devices and device for debugging
       console.log('devices:', devices);
       console.log('device:', device);
     })();

@@ -7,7 +7,6 @@ export default function SpokenLanguageScreen({ navigation }) {
 
   const handleSubmit = () => {
     setSubmitted(true);
-    // Here you would call your backend to get gesture sequence for the input
   };
 
   return (
@@ -25,7 +24,6 @@ export default function SpokenLanguageScreen({ navigation }) {
       {submitted && (
         <View style={styles.gestureBox}>
           <Text style={styles.gestureText}>
-            {/* Placeholder for gesture skeleton animation */}
             (Gesture animation for: "{input}")
           </Text>
         </View>

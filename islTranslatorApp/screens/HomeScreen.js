@@ -1,17 +1,57 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import { useAuth } from '../src/contexts/AuthContext';
 
 export default function HomeScreen({ navigation }) {
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await signOut();
+            if (!result.success) {
+              Alert.alert('Error', result.error);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const getDisplayName = () => {
+    if (user?.displayName) {
+      return user.displayName;
+    } else if (user?.email) {
+      const username = user.email.split('@')[0];
+      return username;
+    } else {
+      return 'User';
+    }
+  };
+
   return (
     <View style={styles.container}>
+      <View style={styles.userInfo}>
+        <Text style={styles.welcomeText}>
+          Welcome, {getDisplayName()}!
+        </Text>
+        <Button title="Sign Out" onPress={handleSignOut} color="#ef4444" />
+      </View>
+
       <View style={styles.illustrationBox}>
-        {/* Placeholder for illustration/icon */}
         <View style={styles.illustrationCircle}>
-          <Text style={{ fontSize: 48, color: '#a21caf' }}>🎤</Text>
+          <Text style={styles.iconText}>🎤</Text>
         </View>
         <Text style={styles.illustrationArrow}>→</Text>
         <View style={styles.illustrationCircle}>
-          <Text style={{ fontSize: 48, color: '#fde047' }}>🤟</Text>
+          <Text style={styles.iconText}>🤟</Text>
         </View>
       </View>
       <Text style={styles.title}>Real-Time Sign Language Translator</Text>
@@ -36,6 +76,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
+  userInfo: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    alignItems: 'flex-end',
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: '#6b7280',
+    marginBottom: 8,
+  },
   illustrationBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -48,6 +99,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f3e8ff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  iconText: {
+    fontSize: 48,
+    color: '#a21caf',
   },
   illustrationArrow: {
     fontSize: 32,

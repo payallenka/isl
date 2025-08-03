@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "900537886059",
+    "project_id": "isl-slt",
+    "storage_bucket": "isl-slt.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900537886059:android:1267e5cf60fbce8180982e",
+        "android_client_info": {
+          "package_name": "com.isltranslatorapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVVxnFv_lcMTVfBlMSYNODkZGPMidZMak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

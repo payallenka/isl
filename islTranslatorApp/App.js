@@ -4,23 +4,48 @@ import { enableScreens } from 'react-native-screens';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import HomeScreen from './screens/HomeScreen';
 import LiveScreen from './screens/LiveScreen';
 import SpokenLanguageScreen from './screens/SpokenLanguageScreen';
 import TransactionsScreen from './screens/TransactionsScreen';
+import LoginScreen from './screens/LoginScreen';
 
 const Stack = createStackNavigator();
 enableScreens();
 
-export default function App() {
+function Navigation() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="LiveScreen" component={LiveScreen} />
-        <Stack.Screen name="SpokenLanguage" component={SpokenLanguageScreen} />
-        <Stack.Screen name="Transactions" component={TransactionsScreen} />
+      <Stack.Navigator 
+        initialRouteName={user ? "Home" : "Login"} 
+        screenOptions={{ headerShown: false }}
+      >
+        {user ? (
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="LiveScreen" component={LiveScreen} />
+            <Stack.Screen name="SpokenLanguage" component={SpokenLanguageScreen} />
+            <Stack.Screen name="Transactions" component={TransactionsScreen} />
+          </>
+        ) : (
+          <Stack.Screen name="Login" component={LoginScreen} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Navigation />
+    </AuthProvider>
   );
 }

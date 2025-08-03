@@ -54,3 +54,76 @@ Thumbs.db
 
 # Ignore test outputs
 ml_service/sample_keypoints.json
+
+# Firebase Configuration Files (Sensitive - Authentication Related)
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase-config.js
+**/firebase.js
+**/firebase.json
+**/firebase-debug.log
+**/firebase-debug.*.log
+
+# Environment Variables and Secrets (Authentication Related)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+secrets.json
+credentials.json
+service-account-key.json
+firebase-service-account.json
+
+# Database Files (May contain user auth data)
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs (May contain auth tokens)
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Build and Cache Directories
+build/
+dist/
+.cache/
+.next/
+.nuxt/
+.output/
+
+# Temporary folders
+tmp/
+temp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Local development files
+local.properties
+local_config.py
+config.local.py
